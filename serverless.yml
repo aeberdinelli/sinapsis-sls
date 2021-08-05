@@ -35,7 +35,6 @@ resources:
       Type: AWS::S3::Bucket
       Properties: 
         BucketName: ${self:custom.bucketPrefix}-${self:service}-thumbnails
-
     # This is where the input images will be stored
     UploadsBucket:
       Type: AWS::S3::Bucket
@@ -52,7 +51,7 @@ functions:
         Action:
           - s3:PutObject
         Resource:
-          Ref: UploadsBucket
+          !GetAtt UploadsBucket.Arn
     environment:
       UPLOADS_BUCKET: ${self:custom.bucketPrefix}-${self:service}-uploads
     events:
@@ -69,7 +68,7 @@ functions:
         Action: 
           - s3:GetObject
         Resource:
-          Ref: ThumbnailsBucket
+          !GetAtt ThumbnailsBucket.Arn
     environment:
       THUMBNAILS_BUCKET: ${self:custom.bucketPrefix}-${self:service}-thumbnails
     events:
@@ -86,12 +85,12 @@ functions:
         Action: 
           - s3:GetObject
         Resource:
-          Ref: UploadsBucket
+          !GetAtt UploadsBucket.Arn
       - Effect: "Allow"
         Action:
           - s3:PutObject
         Resource:
-          Ref: ThumbnailsBucket
+          !GetAtt ThumbnailsBucket.Arn
     environment:
       UPLOADS_BUCKET: ${self:custom.bucketPrefix}-${self:service}-uploads
       THUMBNAILS_BUCKET: ${self:custom.bucketPrefix}-${self:service}-thumbnails
