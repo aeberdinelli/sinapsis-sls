@@ -1,8 +1,8 @@
-const AWS = require('aws-sdk');
 const { uuid } = require('uuidv4');
+const S3 = require('../utils/s3');
 
 async function getUploadUrl() {
-    const s3 = new AWS.S3();
+    const s3 = S3();
 
     // Generate url
     const signedUrl = s3.getSignedUrl('putObject', {

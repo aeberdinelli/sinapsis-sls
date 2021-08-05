@@ -1,10 +1,10 @@
-const AWS = require('aws-sdk');
 const Sharp = require('sharp');
+const S3 = require('../utils/s3');
 
 const allowedTypes = ['image/jpg','image/jpeg','image/png'];
 
 async function processImage(event) {
-    const s3 = new AWS.S3();
+    const s3 = S3();
     const [ record ] = event.Records;
     const sizes = [
         { width: 150, height: 150 }, 

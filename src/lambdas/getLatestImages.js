@@ -1,8 +1,8 @@
-const AWS = require('aws-sdk');
+const S3 = require('../utils/s3');
 const Bucket = process.env.THUMBNAILS_BUCKET || 'sinapsispoc-api-poc-thumbnails';
 
 async function getLatestImages() {
-    const s3 = new AWS.S3();
+    const s3 = S3();
     const { Contents: images } = await s3.listObjectsV2({ Bucket }).promise();
 
     return {

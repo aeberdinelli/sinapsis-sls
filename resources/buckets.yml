@@ -3,3 +3,8 @@ Resources:
     Type: AWS::S3::Bucket
     Properties: 
       BucketName: sinapsispoc-api-poc-thumbnails
+
+  UploadsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: sinapsispoc-api-poc-s3

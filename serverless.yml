@@ -12,26 +12,49 @@ provider:
     stage: ${opt:stage, self:custom.defaultStage}
 
   environment:
-    # App settings
     NODE_ENV: ${self:provider.stage, 'dev'}
     APP_NAME: ${self:service}
     REGION: ${self:provider.region, 'us-east-1'}
 
 custom:
   defaultStage: dev-local
+  bucketPrefix: aeberdinelli # Change this to prevent "bucket already exists" errors
+  s3:
+    host: localhost
+    directory: /tmp
 
 plugins:
+  - serverless-s3-local
+  - serverless-iam-roles-per-function
   - serverless-offline
 
 resources:
-  - ${file(resources/buckets.yml)}
+  Resources:
+    # This is the bucket where the thumbnails will be stored
+    ThumbnailsBucket:
+      Type: AWS::S3::Bucket
+      Properties: 
+        BucketName: ${self:custom.bucketPrefix}-${self:service}-thumbnails
 
+    # This is where the input images will be stored
+    UploadsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.bucketPrefix}-${self:service}-uploads
+
+# Lambda functions
 functions: 
   getUploadUrl:
     handler: src/lambdas/getUploadUrl.getUploadUrl
     description: Get a signed url for uploading images
+    iamRoleStatements: 
+      - Effect: "Allow"
+        Action:
+          - s3:PutObject
+        Resource:
+          Ref: UploadsBucket
     environment:
-      UPLOADS_BUCKET: sinapsispoc-api-poc-s3
+      UPLOADS_BUCKET: ${self:custom.bucketPrefix}-${self:service}-uploads
     events:
       - http:
           path: /getUploadUrl
@@ -41,8 +64,14 @@ functions:
   getLatestImages:
     handler: src/lambdas/getLatestImages.getLatestImages
     description: Get a list of the latest images url
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action: 
+          - s3:GetObject
+        Resource:
+          Ref: ThumbnailsBucket
     environment:
-      THUMBNAILS_BUCKET: sinapsispoc-api-poc-thumbnails
+      THUMBNAILS_BUCKET: ${self:custom.bucketPrefix}-${self:service}-thumbnails
     events:
       - http:
           path: /images
@@ -52,17 +81,28 @@ functions:
   processImage:
     handler: src/lambdas/processImage.processImage
     description: Generates thumbnails every time an image enters the bucket
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action: 
+          - s3:GetObject
+        Resource:
+          Ref: UploadsBucket
+      - Effect: "Allow"
+        Action:
+          - s3:PutObject
+        Resource:
+          Ref: ThumbnailsBucket
     environment:
-      UPLOADS_BUCKET: sinapsispoc-api-poc-s3
-      THUMBNAILS_BUCKET: sinapsispoc-api-poc-thumbnails
+      UPLOADS_BUCKET: ${self:custom.bucketPrefix}-${self:service}-uploads
+      THUMBNAILS_BUCKET: ${self:custom.bucketPrefix}-${self:service}-thumbnails
     events:
       - s3:
-          bucket: sinapsispoc-api-poc-s3
+          bucket: ${self:custom.bucketPrefix}-${self:service}-uploads
           event: s3:ObjectCreated:*
           rules:
             - suffix: .png
       - s3:
-          bucket: sinapsispoc-api-poc-s3
+          bucket: ${self:custom.bucketPrefix}-${self:service}-uploads
           event: s3:ObjectCreated:*
           rules:
             - suffix: .jpg
