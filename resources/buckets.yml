@@ -1,0 +1,5 @@
+Resources:
+  ThumbnailsBucket:
+    Type: AWS::S3::Bucket
+    Properties: 
+      BucketName: sinapsispoc-api-poc-thumbnails

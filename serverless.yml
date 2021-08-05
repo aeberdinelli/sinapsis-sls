@@ -1,0 +1,68 @@
+frameworkVersion: ">=1.50.0"
+app: sinapsis
+service: api
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: us-east-1
+  lambdaHashingVersion: "20201221"
+  tags:
+    project: sinapsis
+    stage: ${opt:stage, self:custom.defaultStage}
+
+  environment:
+    # App settings
+    NODE_ENV: ${self:provider.stage, 'dev'}
+    APP_NAME: ${self:service}
+    REGION: ${self:provider.region, 'us-east-1'}
+
+custom:
+  defaultStage: dev-local
+
+plugins:
+  - serverless-offline
+
+resources:
+  - ${file(resources/buckets.yml)}
+
+functions: 
+  getUploadUrl:
+    handler: src/lambdas/getUploadUrl.getUploadUrl
+    description: Get a signed url for uploading images
+    environment:
+      UPLOADS_BUCKET: sinapsispoc-api-poc-s3
+    events:
+      - http:
+          path: /getUploadUrl
+          cors: true
+          method: get
+
+  getLatestImages:
+    handler: src/lambdas/getLatestImages.getLatestImages
+    description: Get a list of the latest images url
+    environment:
+      THUMBNAILS_BUCKET: sinapsispoc-api-poc-thumbnails
+    events:
+      - http:
+          path: /images
+          cors: true
+          method: get
+
+  processImage:
+    handler: src/lambdas/processImage.processImage
+    description: Generates thumbnails every time an image enters the bucket
+    environment:
+      UPLOADS_BUCKET: sinapsispoc-api-poc-s3
+      THUMBNAILS_BUCKET: sinapsispoc-api-poc-thumbnails
+    events:
+      - s3:
+          bucket: sinapsispoc-api-poc-s3
+          event: s3:ObjectCreated:*
+          rules:
+            - suffix: .png
+      - s3:
+          bucket: sinapsispoc-api-poc-s3
+          event: s3:ObjectCreated:*
+          rules:
+            - suffix: .jpg
