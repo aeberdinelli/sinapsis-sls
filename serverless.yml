@@ -82,12 +82,8 @@ functions:
     description: Generates thumbnails every time an image enters the bucket
     iamRoleStatements:
       - Effect: "Allow"
-        Action: 
-          - s3:GetObject
-        Resource: "*"
-      - Effect: "Allow"
         Action:
-          - s3:PutObject
+          - s3:*
         Resource: "*"
     environment:
       UPLOADS_BUCKET: ${self:custom.bucketPrefix}-${self:service}-uploads
