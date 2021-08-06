@@ -84,13 +84,11 @@ functions:
       - Effect: "Allow"
         Action: 
           - s3:GetObject
-        Resource:
-          !GetAtt UploadsBucket.Arn
+        Resource: "*"
       - Effect: "Allow"
         Action:
           - s3:PutObject
-        Resource:
-          !GetAtt ThumbnailsBucket.Arn
+        Resource: "*"
     environment:
       UPLOADS_BUCKET: ${self:custom.bucketPrefix}-${self:service}-uploads
       THUMBNAILS_BUCKET: ${self:custom.bucketPrefix}-${self:service}-thumbnails
