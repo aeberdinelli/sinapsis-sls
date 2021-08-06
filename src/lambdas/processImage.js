@@ -7,24 +7,24 @@ async function processImage(event) {
     const s3 = S3();
     const [ record ] = event.Records;
     
+    // Original image data
     let Body, ContentType;
 
-    console.log(record);
-
+    // Target thumbnails sizes
     const sizes = [
-        { width: 150, height: 150 }, 
-        { width: 100, height: 100 }, 
-        { width: 50, height: 50 }
+        { width: 400, height: 300 }, 
+        { width: 160, height: 120 }, 
+        { width: 120, height: 120 }
     ];
 
     try {
-        const object = await s3.getObject({
+        const Object = await s3.getObject({
             Bucket: record.s3.bucket.name,
             Key: record.s3.object.key
         }).promise();
     
-        Body = object.Body;
-        ContentType = object.ContentType;
+        Body = Object.Body;
+        ContentType = Object.ContentType;
     }
     catch (err) {
         console.log(err);
@@ -41,20 +41,27 @@ async function processImage(event) {
 
     // Generate new images with the max size
     const resized = await Promise.all(
-        sizes.map(size => Sharp(Body).resize(size.width, size.height, { fit: 'contain' }).toBuffer())
+        sizes.map(size => Sharp(Body).resize(size.width, size.height, { fit: 'fill' }).toBuffer())
     );
 
     // Upload to thumbnails bucket
-    await Promise.all(
-        sizes.map(
-            (size, index) => s3.putObject({
-                Bucket: process.env.THUMBNAILS_BUCKET,
-                ACL: 'public-read',
-                Key: `${size.width}x${size.height}_${record.s3.object.key}`,
-                Body: resized[index]
-            }).promise()
-        )
-    );
+    try {
+        await Promise.all(
+            sizes.map(
+                (size, index) => s3.putObject({
+                    Bucket: process.env.THUMBNAILS_BUCKET,
+                    ACL: 'public-read',
+                    Key: `${size.width}x${size.height}_${record.s3.object.key}`,
+                    Body: resized[index]
+                }).promise()
+            )
+        );
+    }
+    catch (err) {
+        console.log(err);
+
+        return { statusCode: 500, body: 'Could not generate thumbnails for image' };
+    }
 
     return {
         statusCode: 200,

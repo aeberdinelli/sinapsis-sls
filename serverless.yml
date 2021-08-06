@@ -18,7 +18,8 @@ provider:
 
 custom:
   defaultStage: dev-local
-  bucketPrefix: aeberdinelli # Change this to prevent "bucket already exists" errors
+  # Change this to prevent "bucket already exists" errors
+  bucketPrefix: aeberdinelli
   s3:
     host: localhost
     directory: /tmp
@@ -41,8 +42,8 @@ resources:
       Properties:
         BucketName: ${self:custom.bucketPrefix}-${self:service}-uploads
 
-# Lambda functions
 functions: 
+  # GET /getUploadUrl
   getUploadUrl:
     handler: src/lambdas/getUploadUrl.getUploadUrl
     description: Get a signed url for uploading images
@@ -60,15 +61,15 @@ functions:
           cors: true
           method: get
 
+  # GET /images
   getLatestImages:
     handler: src/lambdas/getLatestImages.getLatestImages
     description: Get a list of the latest images url
     iamRoleStatements:
       - Effect: "Allow"
         Action: 
-          - s3:GetObject
-        Resource:
-          !GetAtt ThumbnailsBucket.Arn
+          - s3:*
+        Resource: *
     environment:
       THUMBNAILS_BUCKET: ${self:custom.bucketPrefix}-${self:service}-thumbnails
     events:
@@ -77,6 +78,7 @@ functions:
           cors: true
           method: get
 
+  # Triggers on new uploads
   processImage:
     handler: src/lambdas/processImage.processImage
     description: Generates thumbnails every time an image enters the bucket
