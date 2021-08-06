@@ -1,4 +1,4 @@
-const Sharp = require('sharp');
+const Resizers = require('../utils/resizer');
 const S3 = require('../utils/s3');
 
 const allowedTypes = ['image/jpg','image/jpeg','image/png'];
@@ -41,15 +41,15 @@ async function processImage(event) {
 
     // Generate new images with the max size
     const resized = await Promise.all(
-        sizes.map(size => Sharp(Body).resize(size.width, size.height, { fit: 'fill' }).toBuffer())
+        sizes.map(size => Resizers.Sharp(Body).resize(size.width, size.height, { fit: 'fill' }).toBuffer())
     );
 
-    // Upload to thumbnails bucket
     try {
+        // Upload to thumbnails bucket
         await Promise.all(
             sizes.map(
                 (size, index) => s3.putObject({
-                    Bucket: process.env.THUMBNAILS_BUCKET,
+                    Bucket: process.env.THUMBNAILS_BUCKET || 'thumbnails-bucket',
                     ACL: 'public-read',
                     Key: `${size.width}x${size.height}_${record.s3.object.key}`,
                     Body: resized[index]

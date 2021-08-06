@@ -69,7 +69,7 @@ functions:
       - Effect: "Allow"
         Action: 
           - s3:*
-        Resource: *
+        Resource: "*"
     environment:
       THUMBNAILS_BUCKET: ${self:custom.bucketPrefix}-${self:service}-thumbnails
     events:

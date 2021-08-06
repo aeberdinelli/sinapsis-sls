@@ -1,6 +1,7 @@
 const { uuid } = require('uuidv4');
 const S3 = require('../utils/s3');
 
+// GET /getUploadUrl
 async function getUploadUrl() {
     const s3 = S3();
 
