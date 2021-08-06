@@ -1,4 +1,4 @@
-# Thumbnail Generator API
+# Sinapsis API | [Documentation ↗](https://github.com/aeberdinelli/sinapsis-sls/wiki)
 ## Setup and run offline
 The application is packed with a S3 mock in order to work offline.
 
