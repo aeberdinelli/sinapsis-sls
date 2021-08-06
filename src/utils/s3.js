@@ -13,4 +13,4 @@ function S3() {
     return new AWS.S3();
 }
 
-module.exports = { S3 };
+module.exports = S3;
