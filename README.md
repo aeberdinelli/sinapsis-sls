@@ -16,6 +16,9 @@ The project is configured to use AWS as the cloud provider. You can deploy easil
 
 **Note**: Some values are auto generated such as the S3 bucket names. In order to prevent errors, change the service name in the *serverless.yml* file
 
+## Tests
+Run test suite with `npm test`.
+
 ## CI/CD
 This project also contains a github actions file. To use it, just upload the project to your own github repository and configure the following secrets: `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` with your CI/CD AWS credentials.
 
@@ -23,3 +26,4 @@ This project also contains a github actions file. To use it, just upload the pro
 - Serverless Framework
 - AWS: S3, Lambda, API Gateway
 - NodeJS, AWS SDK, Sharp
+- Jasmine

@@ -1,0 +1,76 @@
+swagger: "2.0"
+info:
+  description: "This document is only for public endpoints. Keep in mind there is some async logic triggered any time there is a new image in the uploads bucket. <br><br>🌎 https://github.com/aeberdinelli/sinapsis-sls"
+  version: "1.0.0"
+  title: "Thumbnail Generator"
+  contact:
+    email: "aeberdinelli@gmail.com"
+
+schemes:
+  - "https"
+  - "http"
+
+paths:
+  /getUploadUrl:
+    get:
+      summary: "Get a signed upload URL to upload images"
+      description: "Returns a url for uploading images to the uploads bucket."
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "Signed url created"
+          schema:
+            $ref: "#/definitions/UploadUrl"
+        "500":
+          description: "Sign url error"
+          schema:
+            type: "string"
+            example: "Could not generate signed URL"
+  /images:
+    get:
+      summary: Get latest images
+      description: Returns an array with the latest generated thumbnails url and information
+      produces:
+        - "application/json"
+      responses:
+        "200":
+          description: "Images array"
+          schema:
+            $ref: "#/definitions/ImagesArray"
+        "500":
+          description: "Error getting images"
+          schema: 
+            type: "string"
+            example: "Could not fetch latest images"
+
+definitions:
+  ImagesArray:
+    type: "object"
+    properties:
+      images:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            name:
+              type: "string"
+              example: "120x120_1.jpg"
+            weight:
+              type: "integer"
+              example: 14408
+            generated:
+              type: "string"
+              example: "2021-08-06T08:00:56.000Z"
+            size: 
+              type: "string"
+              example: "120x120"
+            url:
+              type: "string"
+              example: "https://example-bucket.s3.us-east-1.amazonaws.com/120x120_1.jpg"
+  UploadUrl:
+    type: "object"
+    properties:
+      url:
+        type: "string"
+        example: "https://example-bucket.s3.us-east-1.amazonaws.com/"
