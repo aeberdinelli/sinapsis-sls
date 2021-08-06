@@ -96,16 +96,14 @@ functions:
       THUMBNAILS_BUCKET: ${self:custom.bucketPrefix}-${self:service}-thumbnails
     events:
       - s3:
-          bucket: 
-            Ref: UploadsBucket
+          bucket: ${self:custom.bucketPrefix}-${self:service}-uploads
+          existing: true
           event: s3:ObjectCreated:*
           rules:
             - suffix: .png
-          existing: true
       - s3:
-          bucket: 
-            Ref: UploadsBucket
+          bucket: ${self:custom.bucketPrefix}-${self:service}-uploads
+          existing: true
           event: s3:ObjectCreated:*
           rules:
             - suffix: .jpg
-          existing: true

@@ -26,7 +26,7 @@ async function processImage(event) {
 
     // Generate new images with the max size
     const resized = await Promise.all(
-        sizes.map(size => Sharp.resize(size.width, size.height, { fit: 'contain' }).toBuffer())
+        sizes.map(size => Sharp(Body).resize(size.width, size.height, { fit: 'contain' }).toBuffer())
     );
 
     // Upload to thumbnails bucket
@@ -34,6 +34,7 @@ async function processImage(event) {
         sizes.map(
             (size, index) => s3.putObject({
                 Bucket: process.env.THUMBNAILS_BUCKET,
+                ACL: 'public-read',
                 Key: `${size.width}x${size.height}_${record.s3.object.key}`,
                 Body: resized[index]
             }).promise()
